@@ -1,0 +1,127 @@
+# Load tidyverse package
+library(tidyverse)
+
+# Import our data and save it as crdata
+crdata <- read_csv("Credit.csv")
+
+```
+
+Let's do the following tasks:
+
+1.  View the first four rows of the dataset.
+2.  Check the structure of the dataset. Are the data types (or measurement levels) correct?
+3.  Check the summary of the dataset. In which columns we have missing values?
+
+```{r}
+
+# View the first four rows with head()
+head(crdata,4)  
+
+# Check the structure of the variables in the dataset by using str() function
+str(crdata)
+
+# Check the summary of the dataset
+summary(crdata)
+
+# Update the data types if necessary
+
+```
+
+Before handling the missing values, let's check "Age" column. Do you see anything strange?
+
+Let's check the box plot. We will use `boxplot()` function to perform this task.
+
+```{r}
+
+# Let's have a look at Age column of crdata with boxplot
+boxplot(crdata$Age)
+
+```
+
+As it is seen from the box plot, we have outliers in "Age" column of our dataset. In the next task, we will remove these outliers.
+
+4.  Find the indices of records(rows) with `crdata$Age >= 100` and assign these indices to *outliers*. Print the data records with outliers.
+
+```{r}
+
+# Find the indices of records with age >= 100 and assign these indices to outliers
+outliers <- which(crdata$Age >= 100)  
+
+# Print data records with outliers 
+print(crdata[outliers,])
+
+```
+
+5.  Remove data records with `crdata$Age >= 100`. To remove data records in specific rows, you can use the following syntax:
+
+        dataframe[-rowindex,]
+
+This code will remove the rows stored in *rowindex* from the *dataframe*.
+
+```{r}
+
+# Remove data records with age >= 100 
+crdata <- crdata[-outliers,] 
+
+```
+
+6.  Check the new box plot.
+
+```{r}
+
+# check the boxplot for Age column 
+boxplot(crdata$Age)
+
+```
+
+**Note:**`boxplot()` function can be used to remove outliers as well. Please check [this link](https://www.rdocumentation.org/packages/graphics/versions/3.6.2/topics/boxplot) for R documentation.
+
+Basically, `boxplot(dataset[,i], plot = FALSE)$out` function returns the outliers in the ith column of the dataset without plotting the boxplot. Then, we can use `which()` function to find the row indices of these outliers and remove or replace them. If we have multiple columns to check for outliers, we can use a for loop (iterating over columns) in R to detect outliers and treat them. Please check [this link](https://www.r-bloggers.com/2015/12/how-to-write-the-first-for-loop-in-r/) for an introductory tutorial on for loops.
+
+7.  Find the average income by excluding the missing values. Use `mean()` function with argument `na.rm = T`. Save result as *avg_income*.
+
+```{r}
+
+# Find the average income by excluding the missing values
+avg_income <- mean(crdata$Age, na.rm = T)
+
+#print average income
+print(avg_income)
+
+```
+
+8.  Replace missing values in "Income" column with the average income using `replace_na()` function.
+
+```{r}
+
+# Replace missing values in Income column with average income
+crdata <- replace_na(crdata, list(Income = avg_income))
+
+```
+
+9.  Remove data records with missing values by using `na.omit()` function. Save the result as *crdata_updated*.
+
+```{r}
+
+# Remove records with missing values and assign it to crdata_removed
+ crdata_updated <- na.omit(crdata)
+
+```
+
+10. Check the summary of *crdata_updated*. Can you spot any missing values?
+
+```{r}
+
+# Check the summary of the dataset
+summary(crdata)
+
+```
+
+11. Calculate the number of records removed from the dataset
+
+```{r}
+
+# Calculate the number of removed records
+nrow(crdata)-nrow(crdata_updated)
+
+```
