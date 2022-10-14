@@ -1,0 +1,199 @@
+# Load tidyverse package
+library(tidyverse)
+
+# Import our data and save it as datafile
+datafile <- read_csv("survey.csv")
+
+```
+
+**Note:** Do not forget to remove `eval=FALSE` after you complete each chunk.
+
+Our dataset is imported. Let's check the first five rows by using `head()` function and then view the structure of our data by using `str()` function.
+
+```{r}
+
+# View the first five rows with head()
+# head(filename, n) shows the first n lines of the data file
+head(datafile,5)
+
+
+```
+
+```{r}
+
+# Check the structure of the variables in the dataset by using str() function
+str(datafile)
+
+as.factor(datafile$Gender)
+as.factor(datafile$Handedness)
+
+```
+
+
+When we check the structure of the data, we see that some of the variables are stored as characters instead of categorical variables. We will set the correct measurement levels for those variables by using `as.factor()` function. The basic syntax for this function is given as follows:
+
+      as.factor(dataframe$column)
+
+For instance, the following code script changes the data type of variable "Gender" to a factor.
+
+      datafile$Gender <- as.factor(datafile$Gender)
+
+In order to change the data types of multiple columns, we will use `lapply()` function together with `as.factor()`. `lapply()` function is very useful for performing operations on list objects such as columns of a dataframe. The basic syntax for this function is given as follows:
+
+      lapply(vector, function)
+
+It takes two arguments: *vector* and *function*. `lapply()` applies *function* to each element of *vector*. In this case, *vector* will store the column names and *function* will correspond to `as.factor()`. We will first generate a vector to keep the column names of our data frame that we would like update their data type and then, we will call `lapply()` function. 
+
+```{r}
+
+# Set the correct measurement levels for Gender, Handedness, Exercise and Smoke using lapply() and as.factor() functions
+
+# First generate a vector to keep the column names
+columns <- c("Gender", "Handedness", "Smoke", "Exercise")
+
+# Set the correct measurement levels or data types
+datafile[columns] <- lapply(datafile[columns], as.factor)
+
+# Check the structure of the dataset again
+str(datafile)
+
+
+```
+
+
+Let's return to our data cleaning task. How many levels do we have in "Gender" column?
+
+* Check the levels in "Gender" column by using `levels()` function.
+
+
+```{r, eval=FALSE}
+
+# Check levels of the Gender column
+levels(---)
+
+```
+
+* Correct the data entry errors by replacing "female" with "Female" and "male" with "Male". In order to correct the errors, we need to first find the indices of the entries with incorrect values. Then, we should replace them with the correct ones. For this task, we will use `which()` function. This function selects a subset of entries matching a condition.
+
+   First, find the indices of rows with "female" values and assign these indices to *index_female*
+
+```{r}
+
+# Replace female with Female
+#(1) Find the indices of rows with "female" value
+index_female <- which(datafile$Gender == "female")  
+```
+
+  Now, replace those entries with "Female".
+```{r}
+
+#(2) Replace those entries with "Female"
+datafile$Gender[index_female] = "Female"
+
+
+```
+
+
+  Repeat the steps (1) and (2) for "male"
+```{r}
+
+# Repeat the steps (1) and (2) for male
+index_male <- which(datafile$Gender == "male")
+
+datafile$Gender[index_male] <- "Male"
+  
+#Check levels of the Gender column
+levels(datafile$Gender)
+```
+
+
+Although we corrected the entry errors in the Gender column, the levels did not change. Hence, we should update the factor levels by using `factor()` function.
+
+```{r}
+
+# We should also update the levels
+datafile$Gender <- factor(datafile$Gender)
+
+#Check levels of the Gender column again
+levels(datafile$Gender)
+```
+
+***
+
+Now, we will learn how to handle missing values in R. Let's first check the summary of our data. `summary()` function will provide some statistical information about our data. We can also check whether there are any missing values by analysing the output of `summary()` function.
+
+```{r}
+
+# Check the summary of the data file
+summary(datafile)
+
+```
+
+
+Let's see what happens if we do not remove the missing values.
+
+* Find the average of "Pulse" column.
+
+```{r}
+
+# Find the average pulse 
+mean(datafile$Pulse)
+
+
+```
+
+Let's do the following tasks:
+
+1. Remove records with missing values and assign it to *datafile_new*. For this task, we will use `na.omit()` function which removes the data records with missing values.
+
+```{r}
+
+# Remove records with missing values and assign it to datafile_new
+datafile_new <- na.omit(datafile)
+
+```
+
+2. Calculate the number of records removed from the data. For this task, we will use `nrow()` function which counts the number of rows of a data frame.
+
+```{r}
+
+# Calculate the number of records removed from the data
+nrow(datafile) - nrow(datafile_new)
+
+```
+
+
+Instead of removing the records with missing entries, assume we decided to replace missing entries in "Pulse" and "Height" columns with their average values.
+
+```{r}
+
+# Find the average of Pulse by excluding the missing values
+avg_pulse <- mean(datafile$Pulse, na.rm = T)
+
+print(avg_pulse)
+
+```
+
+```{r}
+
+# Find the average of Height by excluding the missing values
+avg_height <- mean(datafile$Height, na.rm = T)
+
+print(avg_height)
+
+```
+
+Replace records with missing values by using `replace_na()` function. This function takes two arguments; the data frame and the list which stores the values to replace missing values.
+
+```{r}
+
+# Replace records with missing values
+datafile_replace <- replace_na(datafile, list(Pulse = avg_pulse, Height = avg_height))
+
+#  Remove records with missing values and assign the redacted dataset to datafile_removed
+datafile_removed <- na.omit(datafile_replace)
+
+# Calculate the number of records removed from the data
+nrow(datafile) - nrow(datafile_removed)
+
+```
